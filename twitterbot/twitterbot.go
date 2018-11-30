@@ -2,13 +2,12 @@ package twitterbot
 
 import (
 	"bytes"
-	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"text/template"
 	"time"
 
+	"github.com/ankur-anand/gostudygroup-bot/helper"
 	"github.com/ChimeraCoder/anaconda"
 )
 
@@ -37,12 +36,14 @@ var (
 	accessTokenSecret = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 	// twtTmpl stores the parsed template
 	twtTmpl *template.Template
+	// logger
+	logger = helper.Logger
 )
 
 func getenv(name string) string {
 	v := os.Getenv(name)
 	if v == "" {
-		panic("required environment variable is missing " + name)
+		logger.Fatal("required environment variable is missing " + name)
 	}
 
 	return v
@@ -66,7 +67,7 @@ func init() {
 	twtTmpl, err = twtTmpl.Parse(tweetTemplate)
 
 	if err != nil {
-		log.Fatalln("Twitterbot Template Parse Error: ", err)
+		logger.Fatal("Twitterbot Template Parse Error: ", err)
 	}
 
 }
@@ -81,7 +82,7 @@ func getTweetText() string {
 
 	if err != nil {
 		// TODO: Handle it in good way.
-		log.Fatalln("Twitterbot Template Execute Error: ", err)
+		logger.Fatal("Twitterbot Template Execute Error: ", err)
 	}
 
 	return out.String()
@@ -92,17 +93,24 @@ func PostNewTweet() error {
 
 	tweetStatus := getTweetText()
 
-	fmt.Println(tweetStatus)
-
 	anaconda.SetConsumerKey(consumerKey)
 	anaconda.SetConsumerSecret(consumerSecret)
 	api := anaconda.NewTwitterApi(accessToken, accessTokenSecret)
 
+	logger.Infof("Posting Tweet with Content")
+	logger.Infof(tweetStatus)
+
 	twt, err := api.PostTweet(tweetStatus, url.Values{})
+
+	// these error's need to be monitored precisely
+	// as these error can mostly be from twitter api.
 	if err != nil {
-		panic(err)
+		logger.Warn(err)
+		return nil
 	}
 
-	fmt.Println(twt.Text)
+	logger.Infof("The tweet has been successfully posted, to Handle [%s] and status ID is [%d]",
+	twt.User.ScreenName, twt.Id)
+
 	return nil
 }
