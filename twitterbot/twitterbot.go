@@ -2,13 +2,14 @@ package twitterbot
 
 import (
 	"bytes"
+	"fmt"
 	"net/url"
 	"os"
 	"text/template"
 	"time"
 
-	"github.com/ankur-anand/gostudygroup-bot/helper"
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/ankur-anand/gostudygroup-bot/helper"
 )
 
 // YeildWhen ...
@@ -34,6 +35,8 @@ var (
 	consumerSecret    = getenv("TWITTER_CONSUMER_SECRET")
 	accessToken       = getenv("TWITTER_ACCESS_TOKEN")
 	accessTokenSecret = getenv("TWITTER_ACCESS_TOKEN_SECRET")
+	goEnv             = getenv("GO_ENV")
+	prod              = "production"
 	// twtTmpl stores the parsed template
 	twtTmpl *template.Template
 	// logger
@@ -55,6 +58,9 @@ func getCurrentDate() string {
 	// be always correct even in different
 	// timezone as it's handled at configuartion
 	// level
+	if goEnv == prod {
+		return time.Now().Format(dateLayout)
+	}
 	return time.Now().Format(dateLayoutTest)
 }
 
@@ -89,7 +95,7 @@ func getTweetText() string {
 }
 
 // PostNewTweet Post's a new tweet to account.
-func PostNewTweet() error {
+func PostNewTweet() (string, error) {
 
 	tweetStatus := getTweetText()
 
@@ -106,11 +112,12 @@ func PostNewTweet() error {
 	// as these error can mostly be from twitter api.
 	if err != nil {
 		logger.Warn(err)
-		return nil
+		return err.Error(), nil
 	}
+	message := fmt.Sprintf("The tweet has been successfully posted, to Handle [%s] and status ID is [%d]",
+		twt.User.ScreenName, twt.Id)
 
-	logger.Infof("The tweet has been successfully posted, to Handle [%s] and status ID is [%d]",
-	twt.User.ScreenName, twt.Id)
+	logger.Infof(message)
 
-	return nil
+	return message, nil
 }
