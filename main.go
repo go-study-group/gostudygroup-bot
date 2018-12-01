@@ -13,7 +13,6 @@ func main() {
 
 	apiServer := api.NewServer()
 	apiServer.Run(":3000")
-
 	logger.Info("Stoping Bot AppLication")
 	logger.Sync()
 }

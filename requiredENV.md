@@ -2,5 +2,5 @@ TWITTER_CONSUMER_KEY
 TWITTER_CONSUMER_SECRET
 TWITTER_ACCESS_TOKEN
 TWITTER_ACCESS_TOKEN_SECRET
-GO_ENV // shoudl be "production" for production
+GO_ENV // should be "production" for production
 TWITTER_POST_API_KEY

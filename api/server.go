@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"context"
+	"time"
 
 	"github.com/ankur-anand/gostudygroup-bot/helper"
 	"github.com/gorilla/mux"
@@ -30,7 +33,6 @@ func NewServer() *Server {
 func (s *Server) Initialize() {
 	logger.Info("Initialize Server")
 	s.Router = mux.NewRouter()
-	logger.Info("twitterPostAPIKey" + twitterPostAPIKey)
 	s.Controller = newController(twitterPostAPIKey)
 	s.initializeRoutes()
 }
@@ -51,9 +53,27 @@ func (s *Server) Run(addr string) {
 	s.Initialize() // Initialize the server
 	logger.Info("Staring Server at " + addr)
 
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+
 	if addr == "" {
 		logger.Fatal("required addr is missing" + addr)
 	}
-	logger.Fatal(http.ListenAndServe(addr, s.Router))
+
+	// httpServer.
+	h := &http.Server{Addr: addr, Handler: s.Router}
+
+	go func() {
+		logger.Fatal(h.ListenAndServe())
+	}()
+
+	<-stop
+	logger.Infof("Shutting down the server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	h.Shutdown(ctx)
+
+	logger.Infof("Server gracefully stopped")
 
 }
