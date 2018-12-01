@@ -1,3 +1,7 @@
 ## Gostudygroup-bot
 
-Collection of various bot's to automate various functionality of gostudygroup.
+Various bot's to automate some functionality of [gostudygroup](https://gophersource.com/study-group/).
+
+[Required Environment Variable for bot's to run](requiredENV.md)
+
+[API Doc](apiDoc.md)

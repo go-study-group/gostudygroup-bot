@@ -25,3 +25,11 @@ Duplicate error
   "result": "Get https://api.twitter.com/1.1/statuses/update.json returned status 403, {\"errors\":[{\"code\":187,\"message\":\"Status is a duplicate.\"}]}"
 }
 ```
+
+If body.token != TWITTER_POST_API_KEY
+
+```json
+{
+  "error": "UnAuthorized Request"
+}
+```
