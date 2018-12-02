@@ -1,27 +1,19 @@
 package api
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"os"
 	"os/signal"
-	"context"
 	"time"
 
-	"github.com/ankur-anand/gostudygroup-bot/helper"
 	"github.com/gorilla/mux"
-)
-
-var (
-	twitterPostAPIKey = os.Getenv("TWITTER_POST_API_KEY")
-	// logger
-	logger = helper.Logger
 )
 
 // Server ...
 type Server struct {
-	Router     *mux.Router
-	Controller *controller
+	router   *mux.Router
+	twitterC *twitterController
 }
 
 // NewServer returns a new Server
@@ -32,36 +24,32 @@ func NewServer() *Server {
 // Initialize to wire up the routes.
 func (s *Server) Initialize() {
 	logger.Info("Initialize Server")
-	s.Router = mux.NewRouter()
-	s.Controller = newController(twitterPostAPIKey)
+	s.router = mux.NewRouter()
+	s.twitterC = newTwitterController(cfg.TwitterPostAPIToken)
 	s.initializeRoutes()
 }
 
 func (s *Server) initializeRoutes() {
 	// post a tweet to api
-	s.Router.HandleFunc("/api/v1/tweets/startinfive", s.Controller.createTweet).Methods("POST")
+	s.router.HandleFunc("/api/v1/tweets/startinfive", s.twitterC.createTweet).Methods("POST")
 
-	s.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "{\"message\": \"server is up and running\"}")
-	})
+	s.router.HandleFunc("/", staticHomeRoute)
+
+	s.router.HandleFunc("/webhook/github/issuetrigger", handleGithubIssueTrigger)
 }
 
 // Run method to simply start the API Server
-func (s *Server) Run(addr string) {
+func (s *Server) Run() {
 	s.Initialize() // Initialize the server
-	logger.Info("Staring Server at " + addr)
+	logger.Info("Staring Server at " + cfg.Port)
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
 
-	if addr == "" {
-		logger.Fatal("required addr is missing" + addr)
-	}
+	addr := ":" + cfg.Port
 
 	// httpServer.
-	h := &http.Server{Addr: addr, Handler: s.Router}
+	h := &http.Server{Addr: addr, Handler: s.router}
 
 	go func() {
 		logger.Fatal(h.ListenAndServe())

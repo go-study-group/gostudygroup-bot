@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"net/url"
-	"os"
 	"text/template"
 	"time"
 
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/ankur-anand/gostudygroup-bot/config"
 	"github.com/ankur-anand/gostudygroup-bot/helper"
 )
 
@@ -31,26 +31,18 @@ const (
 )
 
 var (
-	consumerKey       = getenv("TWITTER_CONSUMER_KEY")
-	consumerSecret    = getenv("TWITTER_CONSUMER_SECRET")
-	accessToken       = getenv("TWITTER_ACCESS_TOKEN")
-	accessTokenSecret = getenv("TWITTER_ACCESS_TOKEN_SECRET")
-	goEnv             = getenv("GO_ENV")
+	cfg               = config.GetConfig()
+	consumerKey       = cfg.TwitterConsumerKey
+	consumerSecret    = cfg.TwitterConsumerSecret
+	accessToken       = cfg.TwitterAccessToken
+	accessTokenSecret = cfg.TwitterAccessTokenSecret
+	goEnv             = cfg.GoEnv
 	prod              = "production"
 	// twtTmpl stores the parsed template
 	twtTmpl *template.Template
 	// logger
 	logger = helper.Logger
 )
-
-func getenv(name string) string {
-	v := os.Getenv(name)
-	if v == "" {
-		logger.Fatal("required environment variable is missing " + name)
-	}
-
-	return v
-}
 
 func getCurrentDate() string {
 	// Assuming this will be running from the
