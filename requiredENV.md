@@ -8,14 +8,20 @@
 
 `TWITTER_ACCESS_TOKEN_SECRET`=xxxxxxx
 
+## GITHUB Specific
+
+`GITHUB_WEBHOOK_REPOAGENDA_SECRET_KEY`=xxxxxxxxxxx
+
+NOTE: `GITHUB_WEBHOOK_REPOAGENDA_SECRET_KEY` webhookSecretKey configured during the webhook trigger for issue.
+
 ## APPLICATION Specific
 
 `GO_ENV`=production
 
 NOTE: `GO_ENV` should be "production" for production uses otherwise intended tweet will not get twitted
 
-`TWITTER_POST_API_KEY`=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+`TWITTER_POST_API_TOKEN`=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
-NOTE: `TWITTER_POST_API_KEY` will be used to verify every post call to tweet, the body parameter `token` value should be same.
+NOTE: `TWITTER_POST_API_TOKEN` will be used to verify every post call to tweet, the body parameter `token` value should be same.
 
 `PORT`=xxxx // Port for application to run ex - 8080
