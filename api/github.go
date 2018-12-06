@@ -43,11 +43,11 @@ func newGithubController() githubController {
 func (gc githubController) handleGithubIssueTrigger(w http.ResponseWriter, r *http.Request) {
 	payload, err := github.ValidatePayload(r, []byte(gc.webhookKey))
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err)
 	}
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err)
 	}
 
 	switch eT := event.(type) {

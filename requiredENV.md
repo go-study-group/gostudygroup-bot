@@ -14,6 +14,18 @@
 
 NOTE: `GITHUB_WEBHOOK_REPOAGENDA_SECRET_KEY` webhookSecretKey configured during the webhook trigger for issue.
 
+`GITHUB_ISSUELABELER_INSTALLATION_ID`=xxxxxxxx
+
+NOTE: `GITHUB_ISSUELABELER_INSTALLATION_ID` is the GITHUB APP installation ID for the repo.
+
+`GITHUB_ISSUELABELLER_INTEGERATION_ID`=xxxxxxx
+
+NOTE: `GITHUB_ISSUELABELLER_INTEGERATION_ID` is the GITHUB APP ID.
+
+`GITHUB_ISSUELABELLER_PEMFILE_PATH`=xxxxxxx.pem
+
+NOTE: `GITHUB_ISSUELABELLER_PEMFILE_PATH` complete file location of the pem file path
+
 ## APPLICATION Specific
 
 `GO_ENV`=production

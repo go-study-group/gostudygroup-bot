@@ -33,3 +33,7 @@ If body.token != TWITTER_POST_API_KEY
   "error": "UnAuthorized Request"
 }
 ```
+
+## Github Webhook for Issue Notification Path
+
+PATH `/webhook/github/issuetrigger`
