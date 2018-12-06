@@ -14,6 +14,7 @@ import (
 type Server struct {
 	router   *mux.Router
 	twitterC *twitterController
+	githubC  githubController
 }
 
 // NewServer returns a new Server
@@ -26,6 +27,7 @@ func (s *Server) Initialize() {
 	logger.Info("Initialize Server")
 	s.router = mux.NewRouter()
 	s.twitterC = newTwitterController(cfg.TwitterPostAPIToken)
+	s.githubC = newGithubController()
 	s.initializeRoutes()
 }
 
@@ -35,7 +37,7 @@ func (s *Server) initializeRoutes() {
 
 	s.router.HandleFunc("/", staticHomeRoute)
 
-	s.router.HandleFunc("/webhook/github/issuetrigger", handleGithubIssueTrigger)
+	s.router.HandleFunc("/webhook/github/issuetrigger", s.githubC.handleGithubIssueTrigger).Methods("POST")
 }
 
 // Run method to simply start the API Server

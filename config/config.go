@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/ankur-anand/gostudygroup-bot/helper"
 )
@@ -20,6 +21,9 @@ var (
 
 	// Github Specific
 	githubWebhookRepoAgendaSecretKey = getenv("GITHUB_WEBHOOK_REPOAGENDA_SECRET_KEY")
+	issueLabelerInstallationID       = getenv("GITHUB_ISSUELABELER_INSTALLATION_ID")
+	issueLabelerIntegrationID        = getenv("GITHUB_ISSUELABELLER_INTEGERATION_ID")
+	issueLabelerPemFilePath          = getenv("GITHUB_ISSUELABELLER_PEMFILE_PATH")
 	// GoEnv envKey GO_ENV..
 	goEnv               = getenv("GO_ENV")
 	port                = getenv("PORT")
@@ -47,6 +51,9 @@ type Config struct {
 	GoEnv                            string
 	GithubWebhookRepoAgendaSecretKey string
 	Port                             string
+	GithubIssueLabelerInstallationID int
+	GithubIssueLabelerIntegrationID  int
+	GithubIssueLabelerPemFilePath    string
 }
 
 // GetConfig returns a Config structs holding
@@ -61,5 +68,16 @@ func GetConfig() Config {
 		GoEnv:                            goEnv,
 		GithubWebhookRepoAgendaSecretKey: githubWebhookRepoAgendaSecretKey,
 		Port:                             port,
+		GithubIssueLabelerInstallationID: stringToInt(issueLabelerInstallationID),
+		GithubIssueLabelerIntegrationID:  stringToInt(issueLabelerIntegrationID),
+		GithubIssueLabelerPemFilePath:    issueLabelerPemFilePath,
 	}
+}
+
+func stringToInt(value string) int {
+	iValue, err := strconv.Atoi(value)
+	if err != nil {
+		panic(err)
+	}
+	return iValue
 }

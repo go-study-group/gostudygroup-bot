@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ankur-anand/gostudygroup-bot/githubbot"
 	"github.com/google/go-github/v19/github"
 )
 
@@ -20,17 +21,30 @@ var (
 
 	requestText = "i'dliketolearnsomething"
 
-	request      issueType = "request"
-	presentation issueType = "presentation"
-	unknown      issueType = "unknown"
+	request           issueType = "request"
+	presentation      issueType = "presentation"
+	unknown           issueType = "unknown"
+	presentationLabel           = []string{"presentation", "pending-milestone"}
+	requestLabel                = []string{"presenter needed", "request"}
 )
 
-func handleGithubIssueTrigger(w http.ResponseWriter, r *http.Request) {
-	payload, err := github.ValidatePayload(r, []byte(cfg.GithubWebhookRepoAgendaSecretKey))
+type githubController struct {
+	webhookKey string
+	githubBot  githubbot.GithubBot
+}
+
+func newGithubController() githubController {
+	return githubController{
+		webhookKey: cfg.GithubWebhookRepoAgendaSecretKey,
+		githubBot:  githubbot.New(cfg),
+	}
+}
+
+func (gc githubController) handleGithubIssueTrigger(w http.ResponseWriter, r *http.Request) {
+	payload, err := github.ValidatePayload(r, []byte(gc.webhookKey))
 	if err != nil {
 		logger.Fatal(err)
 	}
-
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
 		logger.Fatal(err)
@@ -38,7 +52,7 @@ func handleGithubIssueTrigger(w http.ResponseWriter, r *http.Request) {
 
 	switch eT := event.(type) {
 	case *github.IssuesEvent:
-		processIssuesEvent(eT)
+		gc.processIssuesEvent(eT)
 	default:
 		logger.Info("Info not github issue")
 	}
@@ -49,7 +63,7 @@ func handleGithubIssueTrigger(w http.ResponseWriter, r *http.Request) {
 
 // processIssuesEventProcess the github IssuesEvent
 // for various actions.
-func processIssuesEvent(event *github.IssuesEvent) {
+func (gc githubController) processIssuesEvent(event *github.IssuesEvent) {
 
 	// action has to be "opened" to take action.
 	action := event.GetAction()
@@ -97,7 +111,11 @@ func processIssuesEvent(event *github.IssuesEvent) {
 
 	issueIs := isLearnOrRequest(firstLine)
 	logger.Info(issueIs)
-
+	if issueIs == presentation {
+		gc.githubBot.LabelIssue(event, presentationLabel)
+	} else if issueIs == request {
+		gc.githubBot.LabelIssue(event, requestLabel)
+	}
 }
 
 func isLearnOrRequest(line string) issueType {
