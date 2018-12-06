@@ -9,23 +9,23 @@ import (
 	"github.com/google/go-github/v19/github"
 )
 
-const (
-	newIssue = "opened"
-)
-
 // issueType can be presentaion or request
 type issueType string
 
-var (
+const (
+	newIssue         = "opened"
 	presentationText = "i'dliketoshowsomething"
 
 	requestText = "i'dliketolearnsomething"
 
-	request           issueType = "request"
-	presentation      issueType = "presentation"
-	unknown           issueType = "unknown"
-	presentationLabel           = []string{"presentation", "pending-milestone"}
-	requestLabel                = []string{"presenter needed", "request"}
+	request      issueType = "request"
+	presentation issueType = "presentation"
+	unknown      issueType = "unknown"
+)
+
+var (
+	presentationLabel = []string{"presentation", "pending-milestone"}
+	requestLabel      = []string{"presenter needed", "request"}
 )
 
 type githubController struct {
@@ -54,7 +54,7 @@ func (gc githubController) handleGithubIssueTrigger(w http.ResponseWriter, r *ht
 	case *github.IssuesEvent:
 		gc.processIssuesEvent(eT)
 	default:
-		logger.Info("Info not github issue")
+		logger.Info("Event not a github issue type")
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -109,8 +109,8 @@ func (gc githubController) processIssuesEvent(event *github.IssuesEvent) {
 		logger.Error("reading input: " + err.Error())
 	}
 
-	issueIs := isLearnOrRequest(firstLine)
-	logger.Info(issueIs)
+	issueIs, _ := isLearnOrRequest(firstLine)
+	logger.Info("Type of New Issue is " + issueIs)
 	if issueIs == presentation {
 		gc.githubBot.LabelIssue(event, presentationLabel)
 	} else if issueIs == request {
@@ -118,7 +118,7 @@ func (gc githubController) processIssuesEvent(event *github.IssuesEvent) {
 	}
 }
 
-func isLearnOrRequest(line string) issueType {
+func isLearnOrRequest(line string) (issueType, error) {
 	// check if first line of text is equal to -
 	// presentation topic #I'd Like To Show Something.
 	// or requested topic #I'd Like To Learn Something.
@@ -140,15 +140,16 @@ func isLearnOrRequest(line string) issueType {
 
 	if err := scanner.Err(); err != nil {
 		logger.Error("reading input: " + err.Error())
+		return "", err
 	}
 
 	sbString := sb.String()
 	if strings.Contains(sbString, requestText) {
-		return request
+		return request, nil
 	}
 	if strings.Contains(sbString, presentationText) {
-		return presentation
+		return presentation, nil
 	}
 
-	return unknown
+	return unknown, nil
 }

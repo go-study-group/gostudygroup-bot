@@ -56,9 +56,19 @@ type Config struct {
 	GithubIssueLabelerPemFilePath    string
 }
 
+// Cfg stores the initialized Config
+var Cfg Config
+
+// as these configuration is essential, need be initialized
+// within the init function
+
+func init() {
+	Cfg = getConfig()
+}
+
 // GetConfig returns a Config structs holding
 // Environment variables.
-func GetConfig() Config {
+func getConfig() Config {
 	return Config{
 		TwitterConsumerKey:               twitterConsumerKey,
 		TwitterConsumerSecret:            twitterConsumerSecret,

@@ -28,23 +28,42 @@ const (
 	dateLayout = "02-Jan-2006"
 	// below is just used for testing purpose.
 	dateLayoutTest = time.RFC850
+	prod           = "production"
 )
 
 var (
-	cfg               = config.GetConfig()
-	consumerKey       = cfg.TwitterConsumerKey
-	consumerSecret    = cfg.TwitterConsumerSecret
-	accessToken       = cfg.TwitterAccessToken
-	accessTokenSecret = cfg.TwitterAccessTokenSecret
-	goEnv             = cfg.GoEnv
-	prod              = "production"
-	// twtTmpl stores the parsed template
-	twtTmpl *template.Template
+
 	// logger
 	logger = helper.Logger
 )
 
-func getCurrentDate() string {
+// TwitterBot ...
+type TwitterBot struct {
+	// twtTmpl stores the parsed template
+	twtTmpl *template.Template
+	cfg     config.Config
+}
+
+// New returns a new twitterBot
+func New(cfg config.Config) TwitterBot {
+
+	var err error
+	// a named Template.
+	twtTmpl := template.New("twitterText")
+	// parse the twitter status content and generate the template.
+	twtTmpl, err = twtTmpl.Parse(tweetTemplate)
+
+	if err != nil {
+		logger.Fatal("Twitterbot Template Parse Error: ", err)
+	}
+
+	return TwitterBot{
+		twtTmpl: twtTmpl,
+		cfg:     cfg,
+	}
+}
+
+func getCurrentDate(goEnv string) string {
 	// Assuming this will be running from the
 	// some sort of cron job the date will
 	// be always correct even in different
@@ -56,27 +75,13 @@ func getCurrentDate() string {
 	return time.Now().Format(dateLayoutTest)
 }
 
-func init() {
-
-	var err error
-	// a named Template.
-	twtTmpl = template.New("twitterText")
-	// parse the twitter status content and generate the template.
-	twtTmpl, err = twtTmpl.Parse(tweetTemplate)
-
-	if err != nil {
-		logger.Fatal("Twitterbot Template Parse Error: ", err)
-	}
-
-}
-
-func getTweetText() string {
+func (b TwitterBot) getTweetText() string {
 	yieldWhen := YeildWhen{
-		When: getCurrentDate(),
+		When: getCurrentDate(b.cfg.GoEnv),
 	}
 
 	var out bytes.Buffer
-	err := twtTmpl.Execute(&out, yieldWhen)
+	err := b.twtTmpl.Execute(&out, yieldWhen)
 
 	if err != nil {
 		// TODO: Handle it in good way.
@@ -87,13 +92,13 @@ func getTweetText() string {
 }
 
 // PostNewTweet Post's a new tweet to account.
-func PostNewTweet() (string, error) {
+func (b TwitterBot) PostNewTweet() (string, error) {
 
-	tweetStatus := getTweetText()
+	tweetStatus := b.getTweetText()
 
-	anaconda.SetConsumerKey(consumerKey)
-	anaconda.SetConsumerSecret(consumerSecret)
-	api := anaconda.NewTwitterApi(accessToken, accessTokenSecret)
+	anaconda.SetConsumerKey(b.cfg.TwitterConsumerKey)
+	anaconda.SetConsumerSecret(b.cfg.TwitterConsumerSecret)
+	api := anaconda.NewTwitterApi(b.cfg.TwitterAccessToken, b.cfg.TwitterAccessTokenSecret)
 
 	logger.Infof("Posting Tweet with Content")
 	logger.Infof(tweetStatus)

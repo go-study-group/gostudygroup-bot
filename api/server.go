@@ -13,7 +13,7 @@ import (
 // Server ...
 type Server struct {
 	router   *mux.Router
-	twitterC *twitterController
+	twitterC twitterController
 	githubC  githubController
 }
 
@@ -26,7 +26,7 @@ func NewServer() *Server {
 func (s *Server) Initialize() {
 	logger.Info("Initialize Server")
 	s.router = mux.NewRouter()
-	s.twitterC = newTwitterController(cfg.TwitterPostAPIToken)
+	s.twitterC = newTwitterController()
 	s.githubC = newGithubController()
 	s.initializeRoutes()
 }

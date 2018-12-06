@@ -10,15 +10,15 @@ import (
 // twitterController ...
 type twitterController struct {
 	twitterPostAPIToken string
+	twitterBot          twitterbot.TwitterBot
 }
 
 // newtwitterController creates a new twitterController.
-func newTwitterController(key string) *twitterController {
-	if key == "" {
-		logger.Fatal("required twitterPostAPIToken is missing " + key)
-	}
-	return &twitterController{
-		twitterPostAPIToken: key,
+func newTwitterController() twitterController {
+
+	return twitterController{
+		twitterPostAPIToken: cfg.TwitterPostAPIToken,
+		twitterBot:          twitterbot.New(cfg),
 	}
 }
 
@@ -28,7 +28,7 @@ type PostTweet struct {
 }
 
 // create a newTweet and post it to the twitter bot
-func (c *twitterController) createTweet(w http.ResponseWriter, r *http.Request) {
+func (c twitterController) createTweet(w http.ResponseWriter, r *http.Request) {
 	var pT PostTweet
 	decoder := json.NewDecoder(r.Body)
 
@@ -44,7 +44,7 @@ func (c *twitterController) createTweet(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	res, err := twitterbot.PostNewTweet()
+	res, err := c.twitterBot.PostNewTweet()
 
 	// if err is not nil repond with something went wrong
 	if err != nil {
