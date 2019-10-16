@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ankur-anand/gostudygroup-bot/api"
-	"github.com/ankur-anand/gostudygroup-bot/helper"
+	"github.com/gomods/twitter-bot/api"
+	"github.com/gomods/twitter-bot/helper"
 )
 
 var logger = helper.Logger

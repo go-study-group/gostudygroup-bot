@@ -1,4 +1,4 @@
-package twitterbot
+package main
 
 import (
 	"bytes"
@@ -18,12 +18,11 @@ type YeildWhen struct {
 }
 
 const (
-	tweetTemplate = `The study group is starting in 5 minutes! Come join us, absolutely everyone is welcome!
+	tweetTemplate = `The weekly developer meeting is happening in 1 hour!
 
-	https://zoom.us/j/714787795
-	When: {{ .When}} at 17:00-18:00 UTC
-	Details: https://docs.google.com/document/d/16m99AvcTL_BJOIbR4jkUDSHyApYUDb0VgC9UPBJMed0/edit#
-	`
+	Absolutely everyone is welcome to join, hope to see you there!
+	
+	Video link: https://aka.ms/athensdevzoom`
 	// sort form that we can refer to.
 	dateLayout = "02-Jan-2006"
 	// below is just used for testing purpose.
