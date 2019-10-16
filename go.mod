@@ -1,4 +1,4 @@
-module github.com/ankur-anand/gostudygroup-bot
+module github.com/gomods/twitter-bot
 
 require (
 	github.com/ChimeraCoder/anaconda v2.0.0+incompatible
